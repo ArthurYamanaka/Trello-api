@@ -3,10 +3,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { message, due, labels } = req.body;
+  const { message, due, idLabels } = req.body;
 
   try {
-    const response = await fetch(`https://api.trello.com/1/cards?key=${process.env.TRELLO_KEY}&token=${process.env.TRELLO_TOKEN}`, {
+    const response = await fetch(`https://api.trello.com/1/cards`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -15,7 +15,9 @@ export default async function handler(req, res) {
         name: message,
         due,
         idList: process.env.LIST_ID,
-        labels
+        idLabels,
+        key: process.env.TRELLO_KEY,
+        token: process.env.TRELLO_TOKEN
       })
     });
 
