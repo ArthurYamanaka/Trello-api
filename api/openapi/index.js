@@ -1,47 +1,43 @@
 export default function handler(req, res) {
   res.status(200).json({
-    "openapi": "3.1.0",
-    "info": {
-      "title": "GPT Cards Trello",
-      "version": "1.0.0",
-      "description": "Cria cards no Trello usando uma API pessoal hospedada na Vercel."
+    openapi: "3.1.0",
+    info: {
+      title: "GPT Cards Trello",
+      version: "1.0.0",
+      description: "Cria cards no Trello usando uma API pessoal hospedada na Vercel."
     },
-    "paths": {
+    paths: {
       "/api/createCard": {
-        "post": {
-          "summary": "Cria um card no Trello",
-          "operationId": "createCard",
-          "requestBody": {
-            "required": true,
-            "content": {
+        post: {
+          summary: "Cria um card no Trello",
+          operationId: "createCard",
+          requestBody: {
+            required: true,
+            content: {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "O nome/título do card a ser criado no Trello"
+                schema: {
+                  type: "object",
+                  properties: {
+                    message: {
+                      type: "string",
+                      description: "O nome/título do card a ser criado no Trello"
                     }
                   },
-                  "required": ["message"]
+                  required: ["message"]
                 }
               }
             }
           },
-          "responses": {
+          responses: {
             "200": {
-              "description": "Card criado com sucesso",
-              "content": {
+              description: "Card criado com sucesso",
+              content: {
                 "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "card": {
-                        "type": "object"
-                      }
+                  schema: {
+                    type: "object",
+                    properties: {
+                      success: { type: "boolean" },
+                      card: { type: "object" }
                     }
                   }
                 }
@@ -51,10 +47,10 @@ export default function handler(req, res) {
         }
       }
     },
-    "servers": [
+    servers: [
       {
-        "url": "https://trello-api-rho.vercel.app",
-        "description": "Servidor da API pessoal do Arthur"
+        url: "https://trello-api-rho.vercel.app",
+        description: "Servidor da API pessoal do Arthur"
       }
     ]
   });
