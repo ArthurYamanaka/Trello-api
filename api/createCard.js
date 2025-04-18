@@ -5,30 +5,35 @@ export default async function handler(req, res) {
 
   const { message, due, idLabels } = req.body;
 
-  try {
-    const response = await fetch(`https://api.trello.com/1/cards`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        name: message,
-        due,
-        idList: process.env.LIST_ID,
-        idLabels,
-        key: process.env.TRELLO_KEY,
-        token: process.env.TRELLO_TOKEN
-      })
-    });
+  const TRELLO_KEY = process.env.TRELLO_KEY;
+  const TRELLO_TOKEN = process.env.TRELLO_TOKEN;
+  const LIST_ID = process.env.LIST_ID;
 
-    const data = await response.json();
+  // Busca todas as etiquetas do board
+  const labelsResponse = await fetch(`https://api.trello.com/1/boards/${process.env.BOARD_ID}/labels?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`);
+  const allLabels = await labelsResponse.json();
 
-    if (!response.ok) {
-      return res.status(response.status).json({ error: data });
-    }
+  // Converte os nomes amigáveis para IDs
+  const labelIds = idLabels
+    ? allLabels
+        .filter(label => idLabels.includes(label.name.toLowerCase()))
+        .map(label => label.id)
+    : [];
 
-    return res.status(200).json({ success: true, card: data });
-  } catch (error) {
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
+  // Cria o card com os IDs reais
+  const response = await fetch(`https://api.trello.com/1/cards?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      name: message,
+      idList: LIST_ID,
+      due,
+      idLabels: labelIds
+    })
+  });
+
+  const data = await response.json();
+  res.status(response.status).json(data);
 }
