@@ -1,20 +1,27 @@
 export default async function handler(req, res) {
-  const TRELLO_KEY = process.env.TRELLO_KEY;
-  const TRELLO_TOKEN = process.env.TRELLO_TOKEN;
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
 
   try {
-    const response = await fetch(`https://api.trello.com/1/members/me/boards?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`);
-    const data = await response.json();
+    const TRELLO_KEY = process.env.TRELLO_KEY;
+    const TRELLO_TOKEN = process.env.TRELLO_TOKEN;
 
-    // Retornar só os dados úteis
-    const boards = data.map(board => ({
+    const response = await fetch(
+      `https://api.trello.com/1/members/me/boards?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`
+    );
+
+    const boards = await response.json();
+
+    const simplifiedBoards = boards.map((board) => ({
       id: board.id,
       name: board.name,
-      url: board.url
+      url: board.url,
     }));
 
-    res.status(200).json({ boards });
+    return res.status(200).json({ boards: simplifiedBoards });
   } catch (error) {
-    res.status(500).json({ error: "Erro ao buscar quadros do Trello." });
+    console.error("Erro ao obter boards:", error);
+    return res.status(500).json({ error: "Erro interno ao buscar boards" });
   }
 }
