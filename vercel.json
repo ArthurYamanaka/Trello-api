@@ -2,8 +2,8 @@
   "version": 2,
   "routes": [
     {
-      "src": "/api/createCard",
-      "dest": "api/createCard.js"
+      "src": "/api/createCardSmart",
+      "dest": "api/createCardSmart.js"
     },
     {
       "src": "/api/getBoards",
