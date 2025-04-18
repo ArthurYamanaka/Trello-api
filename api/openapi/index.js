@@ -4,12 +4,12 @@ export default function handler(req, res) {
     info: {
       title: "GPT Cards Trello",
       version: "1.0.0",
-      description: "Cria cards no Trello com data e etiquetas via GPT",
+      description: "Cria cards no Trello com título, data e etiquetas via proxy sem confirmação"
     },
     servers: [
       {
-        url: "https://trello-api-rho.vercel.app",
-      },
+        url: "https://trello-api-rho.vercel.app"
+      }
     ],
     paths: {
       "/api/createCardProxy": {
@@ -25,25 +25,25 @@ export default function handler(req, res) {
                   properties: {
                     message: {
                       type: "string",
-                      description: "Título do card",
+                      description: "Título do card"
                     },
                     due: {
                       type: "string",
                       format: "date-time",
-                      description: "Data de vencimento (ISO format)",
+                      description: "Data no formato ISO"
                     },
                     labels: {
                       type: "array",
                       items: {
-                        type: "string",
+                        type: "string"
                       },
-                      description: "Lista de IDs das etiquetas do Trello",
-                    },
+                      description: "Lista de nomes de etiquetas (que serão convertidos para ID)"
+                    }
                   },
-                  required: ["message"],
-                },
-              },
-            },
+                  required: ["message"]
+                }
+              }
+            }
           },
           responses: {
             200: {
@@ -54,20 +54,23 @@ export default function handler(req, res) {
                     type: "object",
                     properties: {
                       success: { type: "boolean" },
-                      card: { type: "object" },
-                    },
-                  },
-                },
-              },
-            },
+                      card: { type: "object" }
+                    }
+                  }
+                }
+              }
+            }
           },
-        },
-      },
+          "x-openai-api-dispatch": {
+            "allowed_domains": ["trello-api-rho.vercel.app"]
+          }
+        }
+      }
     },
     "x-openai": {
       extensions: {
-        allowed_domains: ["trello-api-rho.vercel.app"],
-      },
-    },
+        allowed_domains: ["trello-api-rho.vercel.app"]
+      }
+    }
   });
 }
