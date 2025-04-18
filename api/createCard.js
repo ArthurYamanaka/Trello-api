@@ -5,36 +5,30 @@ export default async function handler(req, res) {
 
   const { message, due, labels } = req.body;
 
-  const TRELLO_KEY = process.env.TRELLO_KEY;
-  const TRELLO_TOKEN = process.env.TRELLO_TOKEN;
-  const TRELLO_LIST_ID = process.env.LIST_ID;
+  try {
+    const response = await fetch(`https://api.trello.com/1/cards`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: message,
+        due,
+        idLabels: labels,
+        idList: process.env.LIST_ID,
+        key: process.env.TRELLO_KEY,
+        token: process.env.TRELLO_TOKEN,
+      }),
+    });
 
-  if (!TRELLO_KEY || !TRELLO_TOKEN || !TRELLO_LIST_ID) {
-    return res.status(500).json({ error: "Missing Trello credentials" });
+    const data = await response.json();
+
+    if (!response.ok) {
+      return res.status(response.status).json({ error: data });
+    }
+
+    return res.status(200).json({ success: true, card: data });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal Server Error" });
   }
-
-  const url = `https://api.trello.com/1/cards?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`;
-
-  const body = {
-    name: message,
-    idList: TRELLO_LIST_ID,
-    ...(due && { due }),
-    ...(labels && { idLabels: labels }),
-  };
-
-  const trelloRes = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-
-  const data = await trelloRes.json();
-
-  if (!trelloRes.ok) {
-    return res.status(trelloRes.status).json({ error: data.message || "Erro ao criar o card no Trello" });
-  }
-
-  res.status(200).json({ success: true, card: data });
 }
