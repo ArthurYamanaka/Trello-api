@@ -24,7 +24,9 @@ export default async function handler(req, res) {
     // Passo 3: Buscar todas as etiquetas do board
     const labelsRes = await fetch(`https://api.trello.com/1/boards/${board.id}/labels?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`);
     const labelList = await labelsRes.json();
-    const labelIds = labelList.filter(l => labels.includes(l.name)).map(l => l.id);
+    const labelIds = labelList
+      .filter(l => labels.map(label => label.toLowerCase()).includes(l.name.toLowerCase()))
+      .map(l => l.id);
 
     // Passo 4: Criar o card
     const url = `https://api.trello.com/1/cards?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`;
