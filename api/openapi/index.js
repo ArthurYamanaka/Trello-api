@@ -4,7 +4,7 @@ export default function handler(req, res) {
     info: {
       title: "GPT Cards Trello",
       version: "1.0.0",
-      description: "Cria cards no Trello com título, data e etiquetas via proxy sem confirmação"
+      description: "Cria cards no Trello diretamente, com suporte a nomes simples de etiquetas"
     },
     servers: [
       {
@@ -12,10 +12,10 @@ export default function handler(req, res) {
       }
     ],
     paths: {
-      "/api/createCardProxy": {
+      "/api/createCard": {
         post: {
-          summary: "Cria um card no Trello (via Proxy)",
-          operationId: "createCardProxy",
+          summary: "Cria um card no Trello diretamente",
+          operationId: "createCard",
           requestBody: {
             required: true,
             content: {
@@ -24,20 +24,17 @@ export default function handler(req, res) {
                   type: "object",
                   properties: {
                     message: {
-                      type: "string",
-                      description: "Título do card"
+                      type: "string"
                     },
                     due: {
                       type: "string",
-                      format: "date-time",
-                      description: "Data no formato ISO"
+                      format: "date-time"
                     },
                     labels: {
                       type: "array",
                       items: {
                         type: "string"
-                      },
-                      description: "Lista de nomes de etiquetas (que serão convertidos para ID)"
+                      }
                     }
                   },
                   required: ["message"]
@@ -47,29 +44,10 @@ export default function handler(req, res) {
           },
           responses: {
             200: {
-              description: "Card criado com sucesso",
-              content: {
-                "application/json": {
-                  schema: {
-                    type: "object",
-                    properties: {
-                      success: { type: "boolean" },
-                      card: { type: "object" }
-                    }
-                  }
-                }
-              }
+              description: "Card criado com sucesso"
             }
-          },
-          "x-openai-api-dispatch": {
-            "allowed_domains": ["trello-api-rho.vercel.app"]
           }
         }
-      }
-    },
-    "x-openai": {
-      extensions: {
-        allowed_domains: ["trello-api-rho.vercel.app"]
       }
     }
   });
