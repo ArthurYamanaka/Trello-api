@@ -1,5 +1,10 @@
 export default async function handler(req, res) {
-  const { message } = req.body;
+  const body = req.body || {};
+  const { message } = body;
+
+  if (!message) {
+    return res.status(400).json({ success: false, error: "Message is required" });
+  }
 
   const TRELLO_KEY = process.env.TRELLO_KEY;
   const TRELLO_TOKEN = process.env.TRELLO_TOKEN;
