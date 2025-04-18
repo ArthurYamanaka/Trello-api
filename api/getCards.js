@@ -9,9 +9,12 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Missing listId" });
   }
 
+  const TRELLO_KEY = process.env.TRELLO_KEY;
+  const TRELLO_TOKEN = process.env.TRELLO_TOKEN;
+
   try {
     const response = await fetch(
-      `https://api.trello.com/1/lists/${listId}/cards?key=${process.env.TRELLO_KEY}&token=${process.env.TRELLO_TOKEN}`
+      `https://api.trello.com/1/lists/${listId}/cards?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`
     );
 
     if (!response.ok) {
