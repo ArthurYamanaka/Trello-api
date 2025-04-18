@@ -1,9 +1,7 @@
 {
   "version": 2,
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/api/$1.js"
-    }
+    { "src": "/api/trello/.*", "dest": "/api/trello/$1.js" },
+    { "src": "/api/ticktick/.*", "dest": "/api/ticktick/$1.js" }
   ]
 }
