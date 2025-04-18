@@ -1,7 +1,25 @@
 {
   "version": 2,
   "routes": [
-    { "src": "/api/trello/.*", "dest": "/api/trello/$1.js" },
-    { "src": "/api/ticktick/.*", "dest": "/api/ticktick/$1.js" }
+    {
+      "src": "/api/createCard",
+      "dest": "api/createCard.js"
+    },
+    {
+      "src": "/api/getBoards",
+      "dest": "api/getBoards.js"
+    },
+    {
+      "src": "/api/getLists",
+      "dest": "api/getLists.js"
+    },
+    {
+      "src": "/api/getCards",
+      "dest": "api/getCards.js"
+    },
+    {
+      "src": "/api/openapi",
+      "dest": "api/openapi/index.js"
+    }
   ]
 }
