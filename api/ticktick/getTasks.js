@@ -1,14 +1,18 @@
 const axios = require('axios');
 
-const sessionToken = process.env.TICKTICK_TOKEN;
-
-const headers = {
-  "Content-Type": "application/json",
-  "Cookie": `t=${sessionToken}`,
-  "x-device": '{"platform":"web","os":"Windows","device":"Chrome","name":"","version":6250,"id":"api","channel":"website"}'
-};
-
 module.exports = async (req, res) => {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const sessionToken = process.env.TICKTICK_TOKEN;
+
+  const headers = {
+    "Content-Type": "application/json",
+    "Cookie": `t=${sessionToken}`,
+    "x-device": '{"platform":"web","os":"Windows","device":"Chrome","name":"","version":6250,"id":"api","channel":"website"}'
+  };
+
   try {
     const response = await axios.get('https://api.ticktick.com/api/v2/batch/check/0', { headers });
     const allTasks = response.data.syncTaskBean.update;
