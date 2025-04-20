@@ -1,8 +1,0 @@
-{
-  "name": "trello-ticktick-api",
-  "version": "1.0.0",
-  "type": "commonjs",
-  "dependencies": {
-    "axios": "^1.6.0"
-  }
-}
