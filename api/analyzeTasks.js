@@ -1,5 +1,5 @@
-const getCards = require('./trello/getCards');
-const getTasks = require('./ticktick/getTasks');
+const getCards = require('../lib/getCards');
+const getTasks = require('../lib/getTasks');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -9,33 +9,32 @@ module.exports = async (req, res) => {
   try {
     const { prompt } = req.body;
 
-    // Obtem dados reais
-    const trelloCards = await getCards({ method: 'GET' }, { json: data => data });
-    const ticktickTasks = await getTasks({ method: 'GET' }, { json: data => data });
+    const cards = await getCards();
+    const tasks = await getTasks();
 
-    // Simples análise com base no texto do prompt
-    const cardsHojeAlta = trelloCards.filter(c => 
-      c.due && new Date(c.due).toDateString() === new Date().toDateString() &&
-      c.labels.includes('Prioridade Alta')
+    const hoje = new Date().toDateString();
+
+    const cardsHojeAlta = cards.filter(card =>
+      card.due && new Date(card.due).toDateString() === hoje &&
+      card.labels.includes('Prioridade Alta')
     );
 
-    const tarefasHoje = ticktickTasks.filter(t => 
-      t.dueDate && new Date(t.dueDate).toDateString() === new Date().toDateString()
+    const tarefasHoje = tasks.filter(t =>
+      new Date(t.dueDate).toDateString() === hoje
     );
 
-    // Resumo inteligente
     const resumo = {
-      cardsTrelloAltaHoje: cardsHojeAlta.length,
-      tarefasTickTickHoje: tarefasHoje.length,
-      analise: ""
+      cardsAltaHoje: cardsHojeAlta.length,
+      tarefasHoje: tarefasHoje.length,
+      recomendacao: ""
     };
 
-    if (resumo.cardsTrelloAltaHoje + resumo.tarefasTickTickHoje === 0) {
-      resumo.analise = "Você está livre hoje. Aproveite para descansar ou se organizar.";
-    } else if (resumo.tarefasTickTickHoje >= 5) {
-      resumo.analise = "Hoje está sobrecarregado. Considere priorizar ou delegar.";
+    if (resumo.cardsAltaHoje + resumo.tarefasHoje === 0) {
+      resumo.recomendacao = "Hoje está tranquilo. Aproveite para se organizar.";
+    } else if (resumo.tarefasHoje >= 5) {
+      resumo.recomendacao = "Muitas tarefas hoje. Foque nas mais importantes.";
     } else {
-      resumo.analise = "Você tem atividades importantes para hoje. Foque nas tarefas com maior impacto.";
+      resumo.recomendacao = "Você tem tarefas relevantes hoje. Mantenha o foco.";
     }
 
     return res.status(200).json(resumo);
