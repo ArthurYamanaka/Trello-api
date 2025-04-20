@@ -1,5 +1,15 @@
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "api/ticktick/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/*.js",
+      "use": "@vercel/node"
+    }
+  ],
   "routes": [
     {
       "src": "/api/createCardSmart",
@@ -20,12 +30,16 @@
     {
       "src": "/api/openapi",
       "dest": "api/openapi/index.js"
+    },
+
+    // Rotas TickTick
+    {
+      "src": "/api/ticktick/createTaskWithSubtasks",
+      "dest": "api/ticktick/createTaskWithSubtasks.js"
+    },
+    {
+      "src": "/api/ticktick/getTasks",
+      "dest": "api/ticktick/getTasks.js"
     }
-  ]
-}
-{
-  "routes": [
-    { "src": "/api/trello/(.*)", "dest": "/api/trello/$1" },
-    { "src": "/api/ticktick/(.*)", "dest": "/api/ticktick/$1" }
   ]
 }
