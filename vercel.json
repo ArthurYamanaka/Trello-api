@@ -23,3 +23,9 @@
     }
   ]
 }
+{
+  "routes": [
+    { "src": "/api/trello/(.*)", "dest": "/api/trello/$1" },
+    { "src": "/api/ticktick/(.*)", "dest": "/api/ticktick/$1" }
+  ]
+}
