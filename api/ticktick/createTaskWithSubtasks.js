@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const sessionToken = '154BB8FE914467833344C66821ABCBD0916CEDEA65DDC12DD668166DD29E1D1354DDA0DF15636D00119801F4D87D7BFAC9962465C8A1A5CF1CA5A43983C43F096EF38D9D95F6FCF3F4CA2CEC9F2DE05AF336BE3358DCA9E1737B9EDFA8624DEE82BEE463B1431075BC4DD36207DCA5A8F336BE3358DCA9E1D64E2D2CD19AF6022BB8BB67B572BDA342581C63FE29D8A4C095F6809D58690368144EDDDF7DE7A1E758EE688C2CE33E39311D05FCBE9955'; // Substitua por variável de ambiente depois
+const sessionToken = process.env.TICKTICK_TOKEN;
 
 const headers = {
   "Content-Type": "application/json",
@@ -11,21 +11,29 @@ const headers = {
 const criarTarefaPrincipal = async () => {
   const tarefa = {
     title: "Tarefa com subtasks internas",
-    priority: 3,
-    dueDate: new Date(Date.now() + 86400000).toISOString()
+    priority: 3, // Alta prioridade
+    dueDate: new Date(Date.now() + 86400000).toISOString() // Amanhã
   };
 
-  const response = await axios.post('https://api.ticktick.com/api/v2/batch/task', {
-    add: [tarefa],
-    update: [],
-    delete: [],
-    addAttachments: [],
-    updateAttachments: [],
-    deleteAttachments: []
-  }, { headers });
+  try {
+    const response = await axios.post('https://api.ticktick.com/api/v2/batch/task', {
+      add: [tarefa],
+      update: [],
+      delete: [],
+      addAttachments: [],
+      updateAttachments: [],
+      deleteAttachments: []
+    }, { headers });
 
-  const tarefaCriada = response.data.id2etag;
-  return Object.keys(tarefaCriada)[0];
+    const tarefaCriada = response.data.id2etag;
+    const parentId = Object.keys(tarefaCriada)[0];
+
+    console.log("Tarefa principal criada com sucesso:", parentId);
+    return parentId;
+  } catch (error) {
+    console.error("Erro ao criar tarefa principal:", error.response?.data || error);
+    return null;
+  }
 };
 
 const criarSubtasks = async (parentId, subtasks) => {
@@ -35,16 +43,23 @@ const criarSubtasks = async (parentId, subtasks) => {
     priority
   }));
 
-  const response = await axios.post('https://api.ticktick.com/api/v2/batch/task', {
-    add: tasks,
-    update: [],
-    delete: [],
-    addAttachments: [],
-    updateAttachments: [],
-    deleteAttachments: []
-  }, { headers });
+  try {
+    const response = await axios.post('https://api.ticktick.com/api/v2/batch/task', {
+      add: tasks,
+      update: [],
+      delete: [],
+      addAttachments: [],
+      updateAttachments: [],
+      deleteAttachments: []
+    }, { headers });
 
-  return Object.keys(response.data.id2etag);
+    const ids = Object.keys(response.data.id2etag);
+    console.log("Subtasks criadas com sucesso:", ids);
+    return ids;
+  } catch (error) {
+    console.error("Erro ao criar subtasks:", error.response?.data || error);
+    return [];
+  }
 };
 
 const vincularSubtasks = async (parentId, projectId, subtasksIds) => {
@@ -54,18 +69,18 @@ const vincularSubtasks = async (parentId, projectId, subtasksIds) => {
     projectId
   }));
 
-  await axios.post('https://api.ticktick.com/api/v2/batch/taskParent', payload, { headers });
+  try {
+    await axios.post('https://api.ticktick.com/api/v2/batch/taskParent', payload, { headers });
+    console.log("Subtasks vinculadas corretamente à task principal.");
+  } catch (error) {
+    console.error("Erro ao vincular subtasks:", error.response?.data || error);
+  }
 };
 
-// ESTE BLOCO FINAL É O MAIS IMPORTANTE PARA FUNCIONAR NA VERCEL
 module.exports = async (req, res) => {
-  try {
-    const parentId = await criarTarefaPrincipal();
+  const parentId = await criarTarefaPrincipal();
 
-    if (!parentId) {
-      return res.status(500).json({ error: 'Erro ao criar tarefa principal' });
-    }
-
+  if (parentId) {
     const subtasks = [
       { title: "Comprar coca", priority: 1 },
       { title: "Pegar cerveja", priority: 2 },
@@ -74,14 +89,8 @@ module.exports = async (req, res) => {
 
     const subtaskIds = await criarSubtasks(parentId, subtasks);
     await vincularSubtasks(parentId, 'inbox126993382', subtaskIds);
-
-    return res.status(200).json({
-      message: "Tarefa criada com subtasks vinculadas",
-      parentId,
-      subtaskIds
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Erro geral', detalhes: error.message });
+    res.status(200).json({ message: "Tarefa com subtasks criada com sucesso." });
+  } else {
+    res.status(500).json({ error: "Erro ao criar tarefa principal." });
   }
 };
