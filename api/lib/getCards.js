@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 const getCards = async () => {
   const TRELLO_KEY = process.env.TRELLO_KEY;
   const TRELLO_TOKEN = process.env.TRELLO_TOKEN;
-  const LIST_ID = process.env.TRELLO_LIST_ID; // você precisa colocar isso nas variáveis da Vercel
+  const LIST_ID = process.env.TRELLO_LIST_ID; // precisa estar configurado no painel da Vercel
 
   const url = `https://api.trello.com/1/lists/${LIST_ID}/cards?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`;
 
