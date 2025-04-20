@@ -8,11 +8,11 @@ const headers = {
   "x-device": '{"platform":"web","os":"Windows","device":"Chrome","name":"","version":6250,"id":"api","channel":"website"}'
 };
 
-const criarTarefaPrincipal = async () => {
+module.exports = async (req, res) => {
   const tarefa = {
     title: "Tarefa com subtasks internas",
-    priority: 3, // Alta prioridade
-    dueDate: new Date(Date.now() + 86400000).toISOString() // Amanhã
+    priority: 3,
+    dueDate: new Date(Date.now() + 86400000).toISOString()
   };
 
   try {
@@ -25,27 +25,24 @@ const criarTarefaPrincipal = async () => {
       deleteAttachments: []
     }, { headers });
 
-    const tarefaCriada = response.data.id2etag;
-    const parentId = Object.keys(tarefaCriada)[0];
+    const id2etag = response.data.id2etag;
+    const parentId = Object.keys(id2etag)[0];
 
-    console.log("Tarefa principal criada com sucesso:", parentId);
-    return parentId;
-  } catch (error) {
-    console.error("Erro ao criar tarefa principal:", error.response?.data || error);
-    return null;
-  }
-};
+    // Subtasks
+    const subtasks = [
+      { title: "Subtarefa 1", priority: 1 },
+      { title: "Subtarefa 2", priority: 2 },
+      { title: "Subtarefa 3", priority: 3 }
+    ];
 
-const criarSubtasks = async (parentId, subtasks) => {
-  const tasks = subtasks.map(({ title, priority }) => ({
-    title,
-    parentId,
-    priority
-  }));
+    const subtaskPayload = subtasks.map(({ title, priority }) => ({
+      title,
+      priority,
+      parentId
+    }));
 
-  try {
-    const response = await axios.post('https://api.ticktick.com/api/v2/batch/task', {
-      add: tasks,
+    const subtaskResp = await axios.post('https://api.ticktick.com/api/v2/batch/task', {
+      add: subtaskPayload,
       update: [],
       delete: [],
       addAttachments: [],
@@ -53,44 +50,22 @@ const criarSubtasks = async (parentId, subtasks) => {
       deleteAttachments: []
     }, { headers });
 
-    const ids = Object.keys(response.data.id2etag);
-    console.log("Subtasks criadas com sucesso:", ids);
-    return ids;
+    const subtaskIds = Object.keys(subtaskResp.data.id2etag);
+
+    // Vincular subtasks ao parent
+    const projectId = "inbox126993382"; // ou substitua se for diferente
+
+    const vincularPayload = subtaskIds.map(taskId => ({
+      taskId,
+      parentId,
+      projectId
+    }));
+
+    await axios.post('https://api.ticktick.com/api/v2/batch/taskParent', vincularPayload, { headers });
+
+    res.status(200).json({ message: "Tarefa e subtasks criadas com sucesso!", parentId, subtaskIds });
   } catch (error) {
-    console.error("Erro ao criar subtasks:", error.response?.data || error);
-    return [];
-  }
-};
-
-const vincularSubtasks = async (parentId, projectId, subtasksIds) => {
-  const payload = subtasksIds.map(taskId => ({
-    taskId,
-    parentId,
-    projectId
-  }));
-
-  try {
-    await axios.post('https://api.ticktick.com/api/v2/batch/taskParent', payload, { headers });
-    console.log("Subtasks vinculadas corretamente à task principal.");
-  } catch (error) {
-    console.error("Erro ao vincular subtasks:", error.response?.data || error);
-  }
-};
-
-module.exports = async (req, res) => {
-  const parentId = await criarTarefaPrincipal();
-
-  if (parentId) {
-    const subtasks = [
-      { title: "Comprar coca", priority: 1 },
-      { title: "Pegar cerveja", priority: 2 },
-      { title: "Levar corona", priority: 3 }
-    ];
-
-    const subtaskIds = await criarSubtasks(parentId, subtasks);
-    await vincularSubtasks(parentId, 'inbox126993382', subtaskIds);
-    res.status(200).json({ message: "Tarefa com subtasks criada com sucesso." });
-  } else {
-    res.status(500).json({ error: "Erro ao criar tarefa principal." });
+    console.error("Erro:", error.response?.data || error.message);
+    res.status(500).json({ error: "Erro ao criar tarefas", details: error.response?.data || error.message });
   }
 };
