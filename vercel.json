@@ -28,6 +28,10 @@
     {
       "src": "/api/ticktick/getTasks",
       "dest": "api/ticktick/getTasks.js"
+    },
+    {
+      "src": "/api/analyzeTasks",
+      "dest": "api/analyzeTasks.js"
     }
   ]
 }
