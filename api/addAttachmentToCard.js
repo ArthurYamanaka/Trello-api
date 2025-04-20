@@ -1,4 +1,4 @@
-// Atualizado com suporte a imagem em cards do Trello
+// Atualizado com suporte a imagem em cards do Trelloo
 
 const axios = require('axios');
 
